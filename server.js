@@ -54,12 +54,11 @@ async function findNextAvailableClient() {
   throw new Error('No available clients found.');
 }
 
-
-// Функция для записи текущего клиента в ячейку F2
-async function saveCurrentClientToF2(clientNumber) {
+// Функция для записи текущего клиента в ячейку F3
+async function saveCurrentClientToF3(clientNumber) {
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
-    range: 'F2',
+    range: 'F3',
     valueInputOption: 'RAW',
     resource: {
       values: [[clientNumber]],
@@ -98,8 +97,8 @@ app.post('/call-client', async (req, res) => {
   try {
     const { clientNumber, rowIndex } = await findNextAvailableClient();
 
-    // Записываем текущего клиента в ячейку F2
-    await saveCurrentClientToF2(clientNumber);
+    // Записываем текущего клиента в ячейку F3
+    await saveCurrentClientToF3(clientNumber);
 
     // Фиксируем время начала обслуживания
     await callClient(rowIndex);
@@ -117,11 +116,11 @@ app.post('/end-service', async (req, res) => {
   try {
     const currentClient = (await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'F2',
+      range: 'F3', // Изменено с F2 на F3
     })).data.values?.[0]?.[0];
     
     if (!currentClient) {
-      throw new Error('No current client in F2');
+      throw new Error('No current client in F3');
     }
 
     const rowIndex = parseInt(currentClient, 10) + 1;
@@ -142,7 +141,7 @@ io.on('connection', async (socket) => {
   try {
     const currentClient = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'F2',
+      range: 'F3', // Изменено с F2 на F3
     });
     socket.emit('updateClientNumber', { clientNumber: currentClient.data.values?.[0]?.[0] || 'None' });
   } catch (error) {
