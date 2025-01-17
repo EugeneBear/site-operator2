@@ -35,6 +35,17 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Функция для форматирования даты в формат ДД.ММ.ГГГГ-ЧЧ:ММ:СС
+function formatDate(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${day}.${month}.${year}-${hours}:${minutes}:${seconds}`;
+}
+
 // Функция для поиска следующего свободного клиента
 async function findNextAvailableClient() {
   const response = await sheets.spreadsheets.values.get({
@@ -68,7 +79,7 @@ async function saveCurrentClientToF3(clientNumber) {
 
 // Функция для записи времени начала обслуживания
 async function callClient(rowIndex) {
-  const currentTime = new Date().toISOString();
+  const currentTime = formatDate(new Date()); // Форматируем дату
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
     range: `G${rowIndex}`,
@@ -81,7 +92,7 @@ async function callClient(rowIndex) {
 
 // Функция для записи времени завершения обслуживания
 async function endService(rowIndex) {
-  const currentTime = new Date().toISOString();
+  const currentTime = formatDate(new Date()); // Форматируем дату
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
     range: `H${rowIndex}`,
